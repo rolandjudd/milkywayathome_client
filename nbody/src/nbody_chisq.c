@@ -509,8 +509,8 @@ static void nbNormalizeHistogram(NBodyHistogram* histogram)
     for (i = 0; i < nBin; ++i)
     {
         count = (double) histData[i].rawCount;
-        histData[i].lambda = ((double) i + 0.5) * binSize + start;  /* Report center of the bins */
-        histData[i].count = count / totalNum;
+        histData[i].lambda = ((double) i + 0.5) * binSize + start;  /* Report center of the bins */  
+				histData[i].count = count / totalNum;
         histData[i].err = nbNormalizedHistogramError(histData[i].rawCount, totalNum);
     }
 }
@@ -594,7 +594,6 @@ NBodyHistogram* nbCreateHistogram(const NBodyCtx* ctx,        /* Simulation cont
     {
         histData[i].useBin = TRUE;
     }
-
 
     for (p = st->bodytab; p < endp; ++p)
     {

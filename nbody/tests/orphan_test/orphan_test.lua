@@ -1,4 +1,3 @@
-
 prng = DSFMT.create(argSeed)
 nbody = 4096
 

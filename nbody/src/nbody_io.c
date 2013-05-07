@@ -42,10 +42,12 @@ static void nbPrintSimInfoHeader(FILE* f, const NBodyFlags* nbf, const NBodyCtx*
     fprintf(f,
             "cartesian    = %d\n"
             "hasMilkyway  = %d\n"
-            "centerOfMass = %f, %f, %f\n",
+            "centerOfMass = %f, %f, %f\n"
+            "number of steps = %d\n",
             nbf->outputCartesian,
             (ctx->potentialType == EXTERNAL_POTENTIAL_DEFAULT),
-            X(cmPos), Y(cmPos), Z(cmPos)
+            X(cmPos), Y(cmPos), Z(cmPos),
+            st->step
         );
 
 }

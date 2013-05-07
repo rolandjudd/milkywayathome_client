@@ -1513,6 +1513,7 @@ static NBodyStatus nbMainLoopCL(const NBodyCtx* ctx, NBodyState* st)
         return NBODY_CL_ERROR;
     }
 
+
     while (st->step < ctx->nStep)
     {
         rc = nbCheckKernelErrorCode(ctx, st);

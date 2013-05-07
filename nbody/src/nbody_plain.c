@@ -136,6 +136,11 @@ NBodyStatus nbRunSystemPlain(const NBodyCtx* ctx, NBodyState* st)
     if (nbStatusIsFatal(rc))
         return rc;
 
+
+    //EDIT
+    //Should be
+    //     while (st->step < ctx->nStep)
+
     while (st->step < ctx->nStep)
     {
         rc |= nbStepSystemPlain(ctx, st);

@@ -1642,6 +1642,12 @@ __kernel void NBODY_KERNEL(forceCalculation)
             real ay = 0.0;
             real az = 0.0;
 
+						//EDIT 
+						//Separate bins to avoid floating point precision errors
+						real ax_low = 0.0;
+						real ay_low = 0.0;
+						real az_low = 0.0;
+
             /* Initialize iteration stack, i.e., push root node onto stack */
             int depth = j;
             if (get_local_id(0) == sbase)
@@ -1717,9 +1723,32 @@ __kernel void NBODY_KERNEL(forceCalculation)
                             real ai = nm[base] / (rSq * r);
                           #endif
 
-                            ax = mad(ai, dx, ax);
-                            ay = mad(ai, dy, ay);
-                            az = mad(ai, dz, az);
+
+
+                            //EDIT, split into bins
+														real split = 0.0001;														
+
+                            if(fabs(ai * dx) > split){
+															ax = mad(ai, dx, ax);
+														}
+														else {
+															ax_low = mad(ai, dx, ax_low);
+														}
+
+														if(fabs(ai * dy) > split){
+															ay = mad(ai, dy, ay);
+														}
+														else{
+															ay_low = mad(ai, dy, ay_low);
+														}
+
+														if(fabs(ai * dz) > split){
+                              az = mad(ai, dz, az);
+                            }
+                            else{
+                               az_low = mad(ai, dz, az_low);
+                            }
+
 
                           #if USE_QUAD
                             {
@@ -1739,13 +1768,50 @@ __kernel void NBODY_KERNEL(forceCalculation)
 
                                     real phiQuad = 2.5 * (dr5inv * drQdr) / rSq;
 
-                                    ax = mad(phiQuad, dx, ax);
-                                    ay = mad(phiQuad, dy, ay);
-                                    az = mad(phiQuad, dz, az);
 
-                                    ax = mad(-dr5inv, quad_dx, ax);
-                                    ay = mad(-dr5inv, quad_dy, ay);
-                                    az = mad(-dr5inv, quad_dz, az);
+                                    //EDIT
+                                    if(fabs(phiQuad * dx) > split) {
+                                      ax = mad(phiQuad, dx, ax);
+                                    }
+                                    else {
+                                      ax_low = mad(phiQuad, dx, ax_low);
+                                    }
+
+                                    if(fabs(phiQuad * dy) > split){
+                                      ay = mad(phiQuad, dy, ay);
+                                    }
+                                    else {
+                                      ay_low = mad(phiQuad, dy, ay_low);
+                                    }
+
+                                    if(fabs(phiQuad * dz) > split) {
+                                      az = mad(phiQuad, dz, az);
+                                    }
+                                    else{
+                                      az_low = mad(phiQuad, dz, az_low);
+                                    }
+
+
+                                    if(fabs(-dr5inv * quad_dx) > split) {
+                                      ax = mad(-dr5inv, quad_dx, ax);
+                                    }
+                                    else {
+                                      ax_low = mad(-dr5inv, quad_dx, ax_low);
+                                    }
+
+                                    if(fabs(-dr5inv * quad_dy) > split){
+                                      ay = mad(-dr5inv, quad_dy, ay);
+                                    }
+                                    else {
+                                      ay_low = mad(-dr5inv, quad_dy, ay_low);
+                                    }
+
+                                    if(fabs(-dr5inv * quad_dz) > split) {
+                                      az = mad(-dr5inv, quad_dz, az);
+                                    }
+                                    else{
+                                      az_low = mad(-dr5inv, quad_dz, az_low);
+                                    }
                                 }
                             }
                           #endif /* USE_QUAD */
@@ -1798,6 +1864,11 @@ __kernel void NBODY_KERNEL(forceCalculation)
                 }
                 --depth;  /* Done with this level */
             }
+
+            //EDIT
+            ax = ax + ax_low;
+            ay = ay + ay_low;
+            az = az + az_low;
 
             real accX = _accX[i];
             real accY = _accY[i];

@@ -46,6 +46,12 @@ static inline mwvector nbGravity(const NBodyCtx* ctx, NBodyState* st, const Body
     mwvector pos0 = Pos(p);
     mwvector acc0 = ZERO_VECTOR;
 
+    //EDIT
+    //Used to keep track of the minimum values of the force to determine 
+		//if floating point arithmatic precision errors are an issure
+		real min = 1000;
+		real max = 0;
+
     const NBodyNode* q = (const NBodyNode*) st->tree.root; /* Start at the root */
 
     while (q != NULL)               /* while not at end of scan */
@@ -66,6 +72,17 @@ static inline mwvector nbGravity(const NBodyCtx* ctx, NBodyState* st, const Body
                 phii = Mass(q) / drab;
                 mor3 = phii / drSq;
 
+                //EDIT
+				if(fabs(mor3 * dr.x) > max) { max = dr.x * mor3; }
+	            if(fabs(mor3 * dr.x) < min) { min = dr.x * mor3; }
+				
+				if(fabs(mor3 * dr.y) > max) { max = dr.y * mor3; }
+				if(fabs(mor3 * dr.y) < min) { min = dr.y * mor3; }
+	            
+				if(fabs(mor3 * dr.z) > max) { max = dr.z * mor3; }
+				if(fabs(mor3 * dr.z) < min) { min = dr.z * mor3; }
+				//EDIT
+								
                 acc0.x += mor3 * dr.x;
                 acc0.y += mor3 * dr.y;
                 acc0.z += mor3 * dr.z;
@@ -93,6 +110,18 @@ static inline mwvector nbGravity(const NBodyCtx* ctx, NBodyState* st, const Body
                     acc0.y += phiQ * dr.y;
                     acc0.z += phiQ * dr.z;
 
+
+               		//EDIT
+					if(fabs(dr5inv * Qdr.x) > max) { max = Qdr.x * dr5inv; }
+	            	if(fabs(dr5inv * Qdr.x) < min) { min = Qdr.x * dr5inv; }
+				
+					if(fabs(dr5inv * Qdr.y) > max) { max = Qdr.y * dr5inv; }
+					if(fabs(dr5inv * Qdr.y) < min) { min = Qdr.y * dr5inv; }
+	            
+					if(fabs(dr5inv * Qdr.z) > max) { max = Qdr.z * dr5inv; }
+					if(fabs(dr5inv * Qdr.z) < min) { min = Qdr.z * dr5inv; }
+					//EDIT
+						
                     /* acceleration */
                     acc0.x -= dr5inv * Qdr.x;
                     acc0.y -= dr5inv * Qdr.y;
@@ -110,6 +139,7 @@ static inline mwvector nbGravity(const NBodyCtx* ctx, NBodyState* st, const Body
         {
              q = More(q); /* Follow to the next level if need to go deeper */
         }
+
     }
 
     if (!skipSelf)
@@ -120,7 +150,11 @@ static inline mwvector nbGravity(const NBodyCtx* ctx, NBodyState* st, const Body
         nbReportTreeIncest(ctx, st);
     }
 
-    return acc0;
+	//EDIT
+	//Print out the min a max values
+	//printf("%e,%e\n", max, min);
+	
+  return acc0;
 }
 
 static inline void nbMapForceBody(const NBodyCtx* ctx, NBodyState* st)
